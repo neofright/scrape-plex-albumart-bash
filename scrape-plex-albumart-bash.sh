@@ -12,7 +12,7 @@ do
     metadata_items_album_hash="$(echo "$metadata_items_album"|cut -f2 -d'|')"
 
     ## Build the full path to the album art on disk...
-    album_art_base_dir="${plex_dir}/Metadata/Albums/$(echo "$metadata_items_album_hash"|cut -c 1)/$(echo "$metadata_items_album_hash"|cut -c 2-).bundle/Contents/_combined"
+    album_art_base_dir="${plex_dir}/Metadata/Albums/${metadata_items_album_hash:0:1}/${metadata_items_album_hash:1}.bundle/Contents/_combined"
     album_thumb_url="$(sqlite3 "$plex_db" "SELECT thumb_url FROM taggings WHERE metadata_item_id = '$metadata_items_album_id' AND thumb_url LIKE '%music%'")"
 
     ## Some albums simply don't have artwork available, so we should skip them!
