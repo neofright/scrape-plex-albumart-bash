@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-
+## If you're using ImageMagick 7 then change this check to look for "magick(1)"
 command -v convert >/dev/null 2>&1 || { echo >&2 "convert(1) is required, but not installed. Aborting."; exit 1; };
 
 plex_dir="/mnt/scratch/plex/Library/Application Support/Plex Media Server"
@@ -13,7 +13,6 @@ do
 
     ## Build the full path to the album art on disk...
     album_art_base_dir="${plex_dir}/Metadata/Albums/$(echo "$metadata_items_album_hash"|cut -c 1)/$(echo "$metadata_items_album_hash"|cut -c 2-).bundle/Contents/_combined"
-    #album_thumb_url="$(sqlite3 "$plex_db" "SELECT thumb_url FROM taggings WHERE metadata_item_id = '$metadata_items_album_id' AND extra_data = 'at%3Asource=local'")"
     album_thumb_url="$(sqlite3 "$plex_db" "SELECT thumb_url FROM taggings WHERE metadata_item_id = '$metadata_items_album_id' AND thumb_url LIKE '%music%'")"
 
     ## Some albums simply don't have artwork available, so we should skip them!
@@ -27,7 +26,7 @@ do
         track_media_id="$(sqlite3 "$plex_db" "SELECT id FROM media_items WHERE metadata_item_id = '$child_id'")"
         track_file="$(sqlite3 "$plex_db" "SELECT file FROM media_parts WHERE media_item_id = '$track_media_id'")"
 
-        ## It stands to reason that the album directory is where the track file is stored...
+        ## The album directory is where the track file is stored
         album_dir="$(dirname "$track_file")"
 
         ## I don't want to store the album art in the original directory tree, so I do path substitution here
@@ -40,11 +39,9 @@ do
         ## If we haven't already scraped this album's art...
         if [[ ! -f "$destination_file" ]]
         then
-            ## - Convert the file format to jpeg if it is another format
-            ## - Resize the album art to be 320x320 as this is only being used on an iPod (the display is 320x320)
-            ## - Rockbox doesn't support progressive scan jpegs, so we must convert the image
-            ## No need to do conditional checks on whether the image is of a certain format as we are resizing
-            ## anyway so we can do everything in one operation!
+            ## - Convert the file format to jpeg if it is in another format.
+            ## - Resize the album art. This is being used on an iPod (the display is 320x320).
+            ## - Rockbox doesn't support progressive scan jpegs, so we must convert the image.
             ## https://stackoverflow.com/questions/14556984/imagemagick-creating-multiple-files
             printf "Converting and resizing %s..." "$destination_file"
             convert "$local_album_art"[0] -resize 320x320 -interlace none "$destination_file" && \
