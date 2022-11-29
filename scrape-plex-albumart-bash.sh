@@ -20,9 +20,9 @@ do
     then 
         local_album_art="${album_art_base_dir}/${album_thumb_url//metadata:\/\//}"
 
-        ## Get all of the track ids of this album and then use head to select just a single track
+        ## Get the first track id of this album
         ## Lookup the track's metadata_item_id and then retrieve the location of the track on disk
-        child_id="$(sqlite3 "$plex_db" "SELECT id FROM metadata_items WHERE parent_id = '$metadata_items_album_id'"|head -n1)"
+        child_id="$(sqlite3 "$plex_db" "SELECT id FROM metadata_items WHERE parent_id = '$metadata_items_album_id' LIMIT 1")"
         track_media_id="$(sqlite3 "$plex_db" "SELECT id FROM media_items WHERE metadata_item_id = '$child_id'")"
         track_file="$(sqlite3 "$plex_db" "SELECT file FROM media_parts WHERE media_item_id = '$track_media_id'")"
 
