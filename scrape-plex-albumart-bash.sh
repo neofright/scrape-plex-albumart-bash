@@ -8,8 +8,8 @@ plex_db="${plex_dir}/Plug-in Support/Databases/com.plexapp.plugins.library.db"
 while read -r metadata_items_album
 do
     ## Split the id and hash values from the '|' separated sqlite3 response...
-    metadata_items_album_id="$(echo "$metadata_items_album"|cut -f1 -d'|')"
-    metadata_items_album_hash="$(echo "$metadata_items_album"|cut -f2 -d'|')"
+    metadata_items_album_id="${metadata_items_album%|*}"
+    metadata_items_album_hash="${metadata_items_album#*|}"
 
     ## Build the full path to the album art on disk...
     album_art_base_dir="${plex_dir}/Metadata/Albums/${metadata_items_album_hash:0:1}/${metadata_items_album_hash:1}.bundle/Contents/_combined"
