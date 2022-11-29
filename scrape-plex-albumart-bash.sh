@@ -32,8 +32,6 @@ do
         ## I don't want to store the album art in the original directory tree, so I do path substitution here
         album_dir_replaced="${album_dir//\/mnt\/Music\//\/mnt\/tank\/data\/Music\/Album Art\/}"
         mkdir -p "${album_dir_replaced}"
-
-        #user_thumb_url="$(sqlite3 "$plex_db" "SELECT user_thumb_url FROM metadata_items WHERE id = '$metadata_items_album_id'")"
         
         destination_file="${album_dir_replaced}/folder.jpg"
         ## If we haven't already scraped this album's art...
