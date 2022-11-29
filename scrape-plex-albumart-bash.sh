@@ -45,8 +45,9 @@ do
             ## - Rockbox doesn't support progressive scan jpegs, so we must convert the image
             ## No need to do conditional checks on whether the image is of a certain format as we are resizing
             ## anyway so we can do everything in one operation!
+            ## https://stackoverflow.com/questions/14556984/imagemagick-creating-multiple-files
             printf "Converting and resizing %s..." "$destination_file"
-            convert "$local_album_art" -resize 320x320 -interlace none "$destination_file" && \
+            convert "$local_album_art"[0] -resize 320x320 -interlace none "$destination_file" && \
             printf "OK\n"
         fi
     fi
