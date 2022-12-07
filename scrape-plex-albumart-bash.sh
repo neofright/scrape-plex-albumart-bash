@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-## If you're using ImageMagick 7 then change this check to look for "magick(1)"
-command -v convert >/dev/null 2>&1 || { echo >&2 "convert(1) is required, but not installed. Aborting."; exit 1; };
+dependencies=("convert" "sqlite3") ## If you're using ImageMagick 7 then change "convert" to "magick"
+for bin in "${dependencies[@]}"; do if ! command -v "$bin" >/dev/null 2>&1; then echo "ERROR: ${bin}(1) is required, but not installed."; deps=$((deps+1)); fi; done
+if [[ "$deps" -ne 0 ]]; then echo "ERROR: Install the $deps missing dependencies and try again.";exit 1; fi
 
 plex_dir="/mnt/scratch/plex/Library/Application Support/Plex Media Server"
 plex_db="${plex_dir}/Plug-in Support/Databases/com.plexapp.plugins.library.db"
