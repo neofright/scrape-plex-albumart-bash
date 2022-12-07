@@ -24,11 +24,6 @@ do
         mkdir -p "${album_dir_replaced}"
         
         destination_file="${album_dir_replaced}/folder.jpg"
-        ## If we haven't already scraped this album's artwork:
-        ##      - Convert the file format to jpeg if it is in another format.
-        ##      - Resize the album art as this is being used on an iPod where the display is only 320x320.
-        ##      - Rockbox doesn't support progressive scan jpegs, so we must convert the image.
-        ## https://stackoverflow.com/questions/14556984/imagemagick-creating-multiple-files
         if [[ ! -f "$destination_file" ]]; then printf "Converting and resizing %s..." "$destination_file"; convert "$local_album_art"[0] -resize 320x320 -interlace none "$destination_file" 2>/dev/null && printf "OK\n" || printf "ERR\n"; fi
     fi
 done < <(sqlite3 "$plex_db" "SELECT id,hash,user_thumb_url FROM metadata_items WHERE metadata_type = '9' AND library_section_id != '10'")
