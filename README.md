@@ -6,11 +6,7 @@ I did this initially in Python [here](https://github.com/neofright/scrape-plex-a
 
 However because my Plex account uses 2FA there was no easy way to run the script periodically with cron.
 
-Because of this, I decided that I could probably read the Plex database directly and copy files directly on my server.
-
-This script will probably make some people barf, and I am not a DBA, so it certainly can be optimised beyond its current state.
-
-With that said, it works just fine.
+Because of this, I decided that I could probably read the Plex database directly on my server instead.
 
 ## Usage:
 Edit the contents of these variables:
@@ -18,8 +14,11 @@ Edit the contents of these variables:
     $plex_dir
     $album_dir_replaced
 
-Note that I had to exclude my "Audio Books" Music library (library_section_id '10') so if your music library has id 10 for some reason you'll need to edit the script.
+Note that your Music library name(s) must contain the string 'Music' e.g. `Music` or `DnB Music` etc.
+
+Some direction was provided by [bullwinkle’s how to title titles, or, sqlite in plex for fun and panic](https://wonkabar.org/bullwinkles-how-to-title-titles-or-sqlite-in-plex-for-fun-and-panic/).
 
 ## Requirements:
 ImageMagick (convert)
+
 sqlite3
