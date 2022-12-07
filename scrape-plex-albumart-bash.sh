@@ -5,20 +5,14 @@ command -v convert >/dev/null 2>&1 || { echo >&2 "convert(1) is required, but no
 plex_dir="/mnt/scratch/plex/Library/Application Support/Plex Media Server"
 plex_db="${plex_dir}/Plug-in Support/Databases/com.plexapp.plugins.library.db"
 
-while read -r metadata_items_album
+while IFS="|" read -r metadata_items_album_id metadata_items_album_hash metadata_items_album_thumb_url
 do
-    ## Split the id and hash values from the '|' separated sqlite3 response...
-    metadata_items_album_id="${metadata_items_album%|*}"
-    metadata_items_album_hash="${metadata_items_album#*|}"
-
-    ## Build the full path to the album art on disk...
-    album_art_base_dir="${plex_dir}/Metadata/Albums/${metadata_items_album_hash:0:1}/${metadata_items_album_hash:1}.bundle/Contents/_combined"
-    album_thumb_url="$(sqlite3 "$plex_db" "SELECT thumb_url FROM taggings WHERE metadata_item_id = '$metadata_items_album_id' AND thumb_url LIKE '%music%'")"
-
     ## Some albums simply don't have artwork available, so we should skip them!
-    if [[ -n "$album_thumb_url" ]]
-    then 
-        local_album_art="${album_art_base_dir}/${album_thumb_url//metadata:\/\//}"
+    if [[ -n "$metadata_items_album_thumb_url" ]]
+    then
+        ## Build the full path to the album art on disk...
+        album_art_base_dir="${plex_dir}/Metadata/Albums/${metadata_items_album_hash:0:1}/${metadata_items_album_hash:1}.bundle/Contents/_combined"
+        local_album_art="${album_art_base_dir}/${metadata_items_album_thumb_url#*/}"
 
         ## Get the first track id of this album
         ## Lookup the track's metadata_item_id and then retrieve the location of the track on disk
@@ -42,8 +36,9 @@ do
             ## - Rockbox doesn't support progressive scan jpegs, so we must convert the image.
             ## https://stackoverflow.com/questions/14556984/imagemagick-creating-multiple-files
             printf "Converting and resizing %s..." "$destination_file"
-            convert "$local_album_art"[0] -resize 320x320 -interlace none "$destination_file" && \
-            printf "OK\n"
+            convert "$local_album_art"[0] -resize 320x320 -interlace none "$destination_file" 2>/dev/null && \
+            printf "OK\n" || \
+            printf "ERR\n"
         fi
     fi
-done < <(sqlite3 "$plex_db" "SELECT id,hash FROM metadata_items WHERE metadata_type = '9' AND library_section_id != '10'")
+done < <(sqlite3 "$plex_db" "SELECT id,hash,user_thumb_url FROM metadata_items WHERE metadata_type = '9' AND library_section_id != '10'")
