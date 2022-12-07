@@ -24,6 +24,6 @@ do
         mkdir -p "${album_dir_replaced}"
         
         destination_file="${album_dir_replaced}/folder.jpg"
-        if [[ ! -f "$destination_file" ]]; then printf "Converting and resizing %s..." "$destination_file"; convert "$local_album_art"[0] -resize 320x320 -interlace none "$destination_file" 2>/dev/null && printf "OK\n" || printf "ERR\n"; fi
+        if [[ ! -f "$destination_file" ]];then printf "Converting and resizing %s..." "$destination_file";convert "$local_album_art"[0] -resize 320x320 -interlace none "$destination_file" 2>/dev/null && printf "OK\n" || printf "ERR\n";fi
     fi
 done < <(sqlite3 "$plex_db" "SELECT id,hash,user_thumb_url FROM metadata_items WHERE metadata_type = '9' AND library_section_id != '10'")
