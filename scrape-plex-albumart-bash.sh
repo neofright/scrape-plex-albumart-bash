@@ -20,13 +20,21 @@ function scrape_plex_album_art()
         # shellcheck disable=SC2154
         if [[ "${#global_music_library_path_substitution[@]}" -eq 1 ]]; then album_dir="${album_dir//${!global_music_library_path_substitution[@]}/${global_music_library_path_substitution[@]}}" && mkdir -p "${album_dir}"; fi
         
-        destination_file="${album_dir}/folder.jpg"
-        if [[ ! -f "$destination_file" ]];then printf "Converting and resizing %s..." "$destination_file";convert "$local_album_art"[0] -resize 320x320 -interlace none "$destination_file" 2>/dev/null && printf "OK\n" || printf "ERR\n";fi
+        if [[ "$convert" == 0 ]]
+        then
+            destination_file="${album_dir}/folder.$(file --extension "$local_album_art"|cut -f1 -d'/')"
+            if [[ ! -f "$destination_file" ]]; then printf "Copying %s..." "$destination_file";cp "$local_album_art" "$destination_file" 2>/dev/null && printf "OK\n" || printf "ERR\n";fi
+        else
+            destination_file="${album_dir}/folder.jpg"
+            if [[ ! -f "$destination_file" ]]; then printf "Converting and resizing %s..." "$destination_file";convert "$local_album_art"[0] -resize 320x320 -interlace none "$destination_file" 2>/dev/null && printf "OK\n" || printf "ERR\n";fi
+        fi
+
     done < <(sqlite3 "$plex_db" "SELECT id,hash,user_thumb_url FROM metadata_items WHERE metadata_type = '9' AND user_thumb_url != '' AND library_section_id = '$library_section_id'")
 }
 
 plex_dir="/mnt/scratch/plex/Library/Application Support/Plex Media Server"
 plex_db="${plex_dir}/Plug-in Support/Databases/com.plexapp.plugins.library.db"
+convert=1
 
 ## Note when doing path substitution that this is done to ALL music libraries and ALL library sections (paths).
 ## With multiple libraries and/or multiple library sections with different root paths (e.g. '/mnt/Music' '/media/Music'), this won't work well for you.
