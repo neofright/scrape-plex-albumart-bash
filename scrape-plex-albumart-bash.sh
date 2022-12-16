@@ -22,7 +22,7 @@ function scrape_plex_album_art()
         
         if [[ "$convert" == 0 ]]
         then
-            destination_file="${album_dir}/folder.$(file --brief --extension "$local_album_art"|cut -f1 -d'/')"
+            destination_file="${album_dir}/folder.$(file --brief --extension "$local_album_art"|cut -f1 -d'/'|sed 's/jpeg/jpg/')"
             if [[ ! -f "$destination_file" ]]; then printf "Copying %s..." "$destination_file";cp "$local_album_art" "$destination_file" 2>/dev/null && printf "OK\n" || printf "ERR\n";fi
         else
             destination_file="${album_dir}/folder.jpg"
