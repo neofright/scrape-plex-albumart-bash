@@ -18,7 +18,7 @@ Edit the contents of the variable:
 ## Behaviour:
 By default, the script will place a `folder.jpg` in every album's directory if it doesn't already exist.
 
-(Plex artwork is converted to jpeg, resized to 300x300 and set to interlaced.)
+(Plex artwork is converted to jpeg, resized to 320x320 and set to interlaced.)
 
 - If you wish to copy the existing artwork without conversion set `convert=0`.
 
