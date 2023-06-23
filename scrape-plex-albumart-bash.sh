@@ -3,7 +3,7 @@ dependencies=("convert" "sqlite3") ## If you're using ImageMagick 7 then change 
 for bin in "${dependencies[@]}"; do if ! command -v "$bin" >/dev/null 2>&1; then echo "ERROR: ${bin}(1) is required, but not installed."; deps=$((deps+1)); fi; done
 if [[ "$deps" -ne 0 ]]; then echo "ERROR: Install the $deps missing dependencies and try again.";exit 1; fi
 
-function scrape_plex_album_art()
+scrape_plex_album_art()
 {
     library_section_id="$1"
     while IFS="|" read -r metadata_items_album_id metadata_items_album_hash metadata_items_album_thumb_url
@@ -25,13 +25,36 @@ function scrape_plex_album_art()
             destination_file="${album_dir}/folder.$(file --brief --extension "$local_album_art"|cut -f1 -d'/'|sed 's/jpeg/jpg/')"
             if [[ ! -f "$destination_file" ]]; then printf "Copying %s..." "$destination_file";cp "$local_album_art" "$destination_file" 2>/dev/null && printf "OK\n" || printf "ERR\n";fi
         else
-            destination_file="${album_dir}/folder.jpg"
+            destination_file="${album_dir}/${album_art_jpeg_filename}"
             if [[ ! -f "$destination_file" ]]; then printf "Converting and resizing %s..." "$destination_file";convert "$local_album_art"[0] -resize 320x320 -interlace none "$destination_file" 2>/dev/null && printf "OK\n" || printf "ERR\n";fi
         fi
 
     done < <(sqlite3 "$plex_db" "SELECT id,hash,user_thumb_url FROM metadata_items WHERE metadata_type = '9' AND user_thumb_url != '' AND library_section_id = '$library_section_id'")
 }
 
+## If you rename or delete an album in your source directory, the previously scraped (path substituted) album art
+## will still exist and should be deleted...
+tidy_substituted_album_art_directory()
+{
+    ## Only do this if you're actually using path substitution...
+    if [[ "${#global_music_library_path_substitution[@]}" -eq 1 ]]
+    then
+        echo "Searching for path substituted album art to delete..."
+        while IFS='' read -r -d '' album_art_image
+        do
+            album_art_dir="$(dirname "$album_art_image")"
+            album_dir="${album_art_dir//${global_music_library_path_substitution[@]}/${!global_music_library_path_substitution[@]}}"
+
+            if [[ ! -d "$album_dir" && -d "$album_art_dir" ]];
+            then
+                ## This feels safer than issuing "rm -rfv"
+                rm -v "${album_art_dir}/${album_art_jpeg_filename}" && rmdir -v "$album_art_dir"
+            fi
+        done < <(find "${global_music_library_path_substitution[@]}" -type f -name "$album_art_jpeg_filename" -print0)
+    fi
+}
+
+album_art_jpeg_filename="folder.jpg"
 plex_dir="/mnt/scratch/plex/Library/Application Support/Plex Media Server"
 plex_db="${plex_dir}/Plug-in Support/Databases/com.plexapp.plugins.library.db"
 convert=1
@@ -47,3 +70,5 @@ do
     printf "Scraping artwork from Plex library '%s'...\n" "$library_name"
     scrape_plex_album_art "$library_id"
 done < <(sqlite3 "$plex_db" "SELECT id,name FROM library_sections WHERE name LIKE '%Music%' AND section_type = '8'") ## Your Plex library name must contain the string "Music".
+
+tidy_substituted_album_art_directory
