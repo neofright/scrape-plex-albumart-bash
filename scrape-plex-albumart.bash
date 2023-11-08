@@ -19,6 +19,9 @@ scrape_plex_album_art()
         ## If we don't want to store the album art in the original directory tree, do path substitution here.
         # shellcheck disable=SC2154
         if [[ "${#plex_music_library_db_path_substitution[@]}" -eq 1 ]]; then album_dir="${album_dir//${!plex_music_library_db_path_substitution[@]}/${plex_music_library_db_path_substitution[@]}}" && mkdir -p "${album_dir}"; fi
+
+        # shellcheck disable=SC2154
+        if [[ "${#album_art_path_substitution[@]}" -eq 1 ]]; then album_dir="${album_dir//${!album_art_path_substitution[@]}/${album_art_path_substitution[@]}}" && mkdir -p "${album_dir}"; fi
         
         if [[ "$convert" == 0 ]]
         then
