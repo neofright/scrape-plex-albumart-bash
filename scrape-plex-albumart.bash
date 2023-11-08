@@ -63,7 +63,7 @@ convert=1
 ## With multiple libraries and/or multiple library sections with different root paths (e.g. '/mnt/Music' '/media/Music'), this won't work well for you.
 ## I expect that most users don't want to do path subsitution and because it is difficult to account for I will not expand this functionality.
 #declare -A plex_music_library_db_path_substitution
-#plex_music_library_db_path_substitution["/mnt/tank/data/Music"]="/mnt/tank/data/Music/Album Art"
+#plex_music_library_db_path_substitution[""]=""
 
 ## You might not want to save the album art alongside the original tracks.
 # declare -A album_art_path_substitution
