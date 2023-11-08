@@ -18,7 +18,7 @@ scrape_plex_album_art()
 
         ## If we don't want to store the album art in the original directory tree, do path substitution here.
         # shellcheck disable=SC2154
-        if [[ "${#global_music_library_path_substitution[@]}" -eq 1 ]]; then album_dir="${album_dir//${!global_music_library_path_substitution[@]}/${global_music_library_path_substitution[@]}}" && mkdir -p "${album_dir}"; fi
+        if [[ "${#plex_music_library_db_path_substitution[@]}" -eq 1 ]]; then album_dir="${album_dir//${!plex_music_library_db_path_substitution[@]}/${plex_music_library_db_path_substitution[@]}}" && mkdir -p "${album_dir}"; fi
         
         if [[ "$convert" == 0 ]]
         then
@@ -37,20 +37,20 @@ scrape_plex_album_art()
 tidy_substituted_album_art_directory()
 {
     ## Only do this if you're actually using path substitution...
-    if [[ "${#global_music_library_path_substitution[@]}" -eq 1 ]]
+    if [[ "${#album_art_path_substitution[@]}" -eq 1 ]]
     then
         echo "Searching for path substituted album art to delete..."
         while IFS='' read -r -d '' album_art_image
         do
             album_art_dir="$(dirname "$album_art_image")"
-            album_dir="${album_art_dir//${global_music_library_path_substitution[@]}/${!global_music_library_path_substitution[@]}}"
+            album_dir="${album_art_dir//${album_art_path_substitution[@]}/${!album_art_path_substitution[@]}}"
 
             if [[ ! -d "$album_dir" && -d "$album_art_dir" ]];
             then
                 ## This feels safer than issuing "rm -rfv"
                 rm -v "${album_art_dir}/${album_art_jpeg_filename}" && rmdir -v "$album_art_dir"
             fi
-        done < <(find "${global_music_library_path_substitution[@]}" -type f -name "$album_art_jpeg_filename" -print0)
+        done < <(find "${album_art_path_substitution[@]}" -type f -name "$album_art_jpeg_filename" -print0)
     fi
 }
 
@@ -62,8 +62,12 @@ convert=1
 ## Note when doing path substitution that this is done to ALL music libraries and ALL library sections (paths).
 ## With multiple libraries and/or multiple library sections with different root paths (e.g. '/mnt/Music' '/media/Music'), this won't work well for you.
 ## I expect that most users don't want to do path subsitution and because it is difficult to account for I will not expand this functionality.
-#declare -A global_music_library_path_substitution
-#global_music_library_path_substitution["/mnt/Music"]="/mnt/tank/data/Music/Album Art"
+#declare -A plex_music_library_db_path_substitution
+#plex_music_library_db_path_substitution["/mnt/tank/data/Music"]="/mnt/tank/data/Music/Album Art"
+
+## You might not want to save the album art alongside the original tracks.
+# declare -A album_art_path_substitution
+# album_art_path_substitution["/mnt/tank/data/Music"]="/mnt/tank/data/Music/Album Art"
 
 while IFS="|" read -r library_id library_name
 do

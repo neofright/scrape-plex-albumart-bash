@@ -22,7 +22,7 @@ By default, the script will place a `folder.jpg` in every album's directory if i
 
 - If you wish to copy the existing artwork without conversion set `convert=0`.
 
-- If you wish to do path substitution then uncomment the `global_music_library_path_substitution` lines.
+- If you wish to do path substitution then look at the `*_path_substitution` variables.
 
 
 
